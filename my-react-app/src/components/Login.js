@@ -11,7 +11,7 @@ function Login({ onLogin }) {
     async function submit(e) {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:5000/login", {
+            const response = await axios.post("https://lecture-check-2.onrender.com/login", {
                 email: email,
                 password: password
             });
