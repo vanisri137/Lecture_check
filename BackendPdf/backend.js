@@ -1,0 +1,525 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(
+  "C:/Users/HOME/Downloads/ffmpeg-2026-06-01-git-bf608f16fd-essentials_build - Copy/bin/ffmpeg.exe"
+);
+const fs = require('fs');
+const axios = require('axios');
+const FormData = require('form-data');
+const pdfParse = require('pdf-parse');
+require('dotenv').config();
+console.log(
+  "AssemblyAI Key:",
+  process.env.ASSEMBLYAI_API_KEY
+);
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const ASSEMBLYAI_API_KEY =
+process.env.ASSEMBLYAI_API_KEY;
+
+
+const app = express();
+app.use(express.static('public'));
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(express.json());
+app.use(cors());
+
+// MongoDB Connection
+
+require('dotenv').config();
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB Connected");
+  })
+  .catch((err) => {
+    console.error("MongoDB Connection Error:", err);
+  });
+
+// User Schema and Model
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  password: { type: String, required: true }
+});
+const UserModel = mongoose.model('User', userSchema);
+
+// Media Model
+const Media = mongoose.model('Media', new mongoose.Schema({
+  name: { type: String, required: true },
+  videos: [{ type: String }] // Array of video URLs
+}));
+
+// Audio Schema and Model
+const audioSchema = new mongoose.Schema({
+  mediaId: { type: mongoose.Schema.Types.ObjectId, ref: 'Media', required: true },
+  audioPath: { type: String, required: true }
+});
+const Audio = mongoose.model('Audio', audioSchema);
+
+// Transcription Schema and Model
+const transcriptionSchema = new mongoose.Schema({
+  mediaId: { type: mongoose.Schema.Types.ObjectId, ref: 'Media', required: true },
+  transcription: { type: String, required: true }
+});
+const Transcription = mongoose.model('Transcription', transcriptionSchema);
+
+// Storage for video uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+const upload = multer({ storage: storage });
+
+app.get('/api/v1/media/all', async (req, res) => {
+  try {
+    const medias = await Media.find();
+    res.json(medias);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+
+ // Transcription function using AssemblyAI
+ async function transcribeAudio(audioFilePath, mediaId) {
+   try {
+     // Read audio file as a buffer
+     const audioBuffer = fs.readFileSync(audioFilePath);
+
+     // Upload the audio file to AssemblyAI
+     const uploadResponse = await axios.post('https://api.assemblyai.com/v2/upload', audioBuffer, {
+       headers: {
+         'authorization': ASSEMBLYAI_API_KEY,
+         'content-type': 'application/octet-stream',
+       }
+     });
+
+     const audioUrl = uploadResponse.data.upload_url;
+
+     // Request transcription
+     const transcriptResponse = await axios.post('https://api.assemblyai.com/v2/transcript', {
+       audio_url: audioUrl
+     }, {
+       headers: {
+         'authorization': ASSEMBLYAI_API_KEY,
+         'content-type': 'application/json',
+       }
+     });
+
+     const transcriptId = transcriptResponse.data.id;
+
+     // Poll for transcription completion
+     let transcriptStatus = 'processing';
+     let transcriptText = '';
+     while (transcriptStatus === 'processing') {
+       await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
+       const statusResponse = await axios.get(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
+         headers: {
+           'authorization': ASSEMBLYAI_API_KEY,
+         }
+       });
+       transcriptStatus = statusResponse.data.status;
+       transcriptText = statusResponse.data.text;
+     }
+
+     // Save the transcription to the database
+     if (transcriptStatus === 'completed') {
+       const newTranscription = new Transcription({
+         mediaId: mediaId,
+         transcription: transcriptText
+       });
+
+       await newTranscription.save();
+       console.log(`Saved transcription: ${transcriptText}`);
+
+       const transcriptionFilePath = path.join(__dirname, 'transcription', `${path.basename(audioFilePath, '.mp3')}.txt`);
+      fs.writeFileSync(transcriptionFilePath, transcriptText);
+      console.log(`Transcription saved to file: ${transcriptionFilePath}`);
+     } else {
+       console.error('Transcription failed:', transcriptStatus);
+     }
+   } catch (error) {
+     console.error('Error during transcription:', error);
+   }
+ }
+
+ // POST upload videos route
+ app.post('/api/v1/media/upload', upload.array('videos', 12), async (req, res) => {
+   try {
+     const { name } = req.body;
+     const videoPaths = req.files.map(file => `/${file.path}`);
+
+     // Save uploaded videos to the database
+     const newMedia = new Media({
+       name,
+       videos: videoPaths
+     });
+     await newMedia.save();
+
+     // Convert uploaded videos to audio and store in the database
+     const audioPromises = videoPaths.map((videoPath) => {
+       return new Promise(async (resolve, reject) => {
+         try {
+           const videoFullPath = path.join(__dirname, videoPath);
+           const audioOutput = path.join(__dirname, 'audios', path.basename(videoPath).replace(/\.[^.]+$/, '.mp3'));
+
+           console.log(`Converting video: ${videoFullPath} to audio: ${audioOutput}`);
+
+           ffmpeg(videoFullPath)
+             .on('end', async () => {
+               const audioPath = `/audios/${path.basename(audioOutput)}`;
+               const newAudio = new Audio({
+                 mediaId: newMedia._id,
+                 audioPath
+             });
+
+               try {
+                 await newAudio.save();
+                 console.log(`Saved audio: ${audioPath}`);
+                 resolve(newAudio);
+
+                 // Transcribe audio to text using AssemblyAI
+                 await transcribeAudio(audioOutput, newMedia._id);
+               } catch (dbError) {
+                 console.error('Error saving audio to database:', dbError);
+                 reject(dbError);
+               }
+             })
+             .on('error', (error) => {
+               console.error('Error during FFmpeg processing:', error);
+               reject(error);
+             })
+             .save(audioOutput);
+         } catch (error) {
+           console.error('Error during video to audio conversion:', error);
+           reject(error);
+         }
+       });
+     });
+
+     await Promise.all(audioPromises);
+     res.json({ message: 'Videos uploaded and processed successfully', media: newMedia });
+   } catch (err) {
+     console.error(err.message);
+     res.status(500).send('Server Error');
+   }
+ });
+
+
+ // Example function to fetch transcription texts
+ async function fetchPdfText() {
+  try {
+    const pdfDocument = await PdfModel.findOne().sort({ _id: -1 }); // Fetch latest PDF document
+    return pdfDocument ? pdfDocument.text : '';
+  } catch (error) {
+    console.error('Error fetching PDF text:', error);
+    return '';
+  }
+}
+ 
+
+// Serve static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/audios', express.static(path.join(__dirname, 'audios')));
+app.use('/transcription', express.static(path.join(__dirname, 'transcription')));
+app.use('/files', express.static(path.join(__dirname, 'files')));
+
+// Additional code for PDFs
+const pdfStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './files');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+const pdfUpload = multer({ storage: pdfStorage });
+
+const pdfSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  pdf: { type: String, required: true },
+  text: { type: String }
+});
+const PdfModel = mongoose.model("pdfDetails", pdfSchema);
+
+app.post("/upload-files", pdfUpload.single("file"), async (req, res) => {
+  console.log("File upload request received");
+  console.log("Uploaded file:", req.file);
+  const title = req.body.title;
+  const fileName = req.file.filename;
+  const filePath = path.join(__dirname, 'files', fileName);
+
+  
+      try {
+        const pdfBuffer = fs.readFileSync(filePath);
+        const data = await pdfParse(pdfBuffer);
+    
+        await PdfModel.create({ title: title, pdf: fileName, text: data.text });
+        console.log("File saved to database:", fileName);
+    
+        const transcription_texts = await fetchTranscriptionText();
+        const pdf_texts = data.text;
+    
+        if (transcription_texts && pdf_texts) {
+          const similarityScore = await calculateSimilarity(transcription_texts, pdf_texts);
+          res.send({ status: "ok", similarityScore: similarityScore });
+        } else {
+          console.log("Skipping similarity calculation: Transcription or PDF text not available.");
+          res.send({ status: "ok", message: "Skipping similarity calculation: Transcription or PDF text not available." });
+        }
+       } 
+       catch (error) {
+        console.error("Error saving file to database:", error);
+        res.json({ status: error });
+      }
+        
+    
+   
+});
+async function fetchTranscriptionText() {
+  try {
+    const transcription = await Transcription.findOne().sort({ _id: -1 }); // Fetch latest transcription
+    return transcription ? transcription.transcription : '';
+  } catch (error) {
+    console.error('Error fetching transcription text:', error);
+    return '';
+  }
+}
+
+app.get("/get-files", async (req, res) => {
+  console.log("Get files request received");
+  try {
+    const data = await PdfModel.find({});
+    console.log("Files retrieved from database"/*, data*/);
+    res.send({ status: "ok", data: data });
+  } catch (error) {
+    console.error("Error retrieving files from database:", error);
+    res.json({ status: error });
+  }
+});
+
+// User registration
+app.post("/register", async (req, res) => {
+  console.log("User registration request received");
+
+  const { email, password } = req.body;
+
+  try {
+    const existingUser = await UserModel.findOne({ email });
+
+    if (existingUser) {
+      return res.send({
+        status: "error",
+        message: "User already exists"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new UserModel({
+      email,
+      password: hashedPassword
+    });
+
+    await newUser.save();
+
+    console.log("New user registered:", email);
+
+    res.send({
+      status: "ok",
+      message: "Registration successful"
+    });
+
+  } catch (error) {
+    console.error("Error registering user:", error);
+
+    res.status(500).send({
+      status: "error",
+      message: "Registration failed"
+    });
+  }
+});
+// User login
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.send({
+        status: "error",
+        message: "User not found"
+      });
+    }
+
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!isMatch) {
+      return res.send({
+        status: "error",
+        message: "Invalid credentials"
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d"
+      }
+    );
+
+    res.send({
+      status: "ok",
+      token,
+      user: {
+        email: user.email
+      }
+    });
+
+  } catch (error) {
+    console.error("Login error:", error);
+
+    res.status(500).send({
+      status: "error",
+      message: "Server error"
+    });
+  }
+});
+
+// Ensure directories exist
+const ensureDirectoryExistence = (dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+};
+
+
+
+async function calculateSimilarity(transcription_texts, pdf_texts) {
+  try {
+    if (!transcription_texts || !pdf_texts) {
+      console.error('Both transcription_text and pdf_text are required.');
+      return { error: 'Both transcription_text and pdf_text are required.' };
+    }
+
+    const response = await axios.post('http://localhost:5001/api/similarity', {
+      transcription_texts,
+      pdf_texts
+    });
+
+    // console.log('Similarity score:', response.data);
+    console.log('Similarity score:', response.data.similarity_score);
+    return response.data; // Assuming response.data contains the similarity score
+  } catch (error) {
+    console.error('Error calculating similarity:', error);
+    return { error: 'Error calculating similarity' };
+  }
+}
+// Endpoint to calculate similarity score
+app.get('/api/v1/similarity-score', async (req, res) => {
+  try {
+    const transcription_texts = await fetchTranscriptionText();
+    const pdf_texts = await fetchPdfText();
+
+    if (transcription_texts && pdf_texts) {
+      const similarityScoreResponse = await calculateSimilarity(transcription_texts, pdf_texts);
+      const similarityScore = similarityScoreResponse.similarity_score;
+
+      res.json({ similarity_score: similarityScore });
+      
+    } else {
+      res.status(400).json({ error: 'Transcription text or PDF text not available.' });
+    }
+  } catch (error) {
+    console.error('Error fetching similarity score:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+// Dashboard Statistics
+app.get("/dashboard-stats", async (req, res) => {
+  try {
+    const lectures = await Media.countDocuments();
+    const pdfs = await PdfModel.countDocuments();
+    const users = await UserModel.countDocuments();
+
+    const latestMedia = await Media.findOne().sort({ _id: -1 });
+    const latestPdf = await PdfModel.findOne().sort({ _id: -1 });
+
+    res.json({
+      lectures,
+      pdfs,
+      users,
+      recentActivity: [
+        latestMedia?.name || null,
+        latestPdf?.title || null
+      ].filter(Boolean)
+    });
+
+  } catch (error) {
+    console.error("Dashboard Stats Error:", error);
+
+    res.status(500).json({
+      error: "Failed to fetch dashboard stats"
+    });
+  }
+});
+
+
+ensureDirectoryExistence(path.join(__dirname, 'uploads'));
+ensureDirectoryExistence(path.join(__dirname, 'audios'));
+ensureDirectoryExistence(path.join(__dirname, 'transcription'));
+ensureDirectoryExistence(path.join(__dirname, 'files'));
+
+// Route to delete a PDF file
+app.delete('/delete-file/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Find the PDF document in the database
+    const pdf = await PdfModel.findById(id);
+    if (!pdf) {
+      return res.status(404).json({ status: "error", message: "PDF not found" });
+    }
+
+    // Construct the file path
+    const filePath = path.join(__dirname, 'files', pdf.pdf);
+
+    // Delete the PDF file from the server
+    fs.unlink(filePath, async (err) => {
+      if (err) {
+        console.error('Error deleting file from server:', err);
+        return res.status(500).json({ status: "error", message: "Failed to delete file from server" });
+      }
+
+      // Remove the PDF record from the database
+      await PdfModel.findByIdAndDelete(id);
+      res.json({ status: "ok", message: "PDF deleted successfully" });
+    });
+  } catch (error) {
+    console.error('Error deleting PDF:', error);
+    res.status(500).json({ status: "error", message: "Failed to delete PDF" });
+  }
+});
+
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+

@@ -1,0 +1,161 @@
+.sidebar ul li:hover{
+   background-color: grey;
+   border-radius: 5px;
+   cursor: pointer;
+   
+}
+.sidebar ul li:hover a{
+
+    color: white;
+}
+.active{
+   background-color: grey;
+   border-radius: 5px;
+   color:white;
+}
+.sidebar hr.text-white {
+    text-decoration: none;
+  }
+  .sidebar {
+    background-color: rgb(24, 21, 39);
+    color: white;
+}
+sidebar {
+  transition: all 0.3s;
+}
+
+/* Media query for small screens */
+@media (max-width: 768px) {
+  .sidebar {
+      position: absolute;
+      width: 250px;
+      transform: translateX(-250px);
+  }
+
+  .sidebar.active {
+      transform: translateX(0);
+  }
+}
+
+.nav-item {
+  cursor: pointer;
+}
+
+.custom-sidebar {
+  width: 280px;
+  min-height: 100vh;
+  background: #212529;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 25px 18px;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-box {
+  width: 55px;
+  height: 55px;
+  background: #ffc107;
+  color: #212529;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.logo-title {
+  margin: 0;
+  color: #ffc107;
+  font-weight: 700;
+}
+
+.logo-subtitle {
+  font-size: 12px;
+  color: #adb5bd;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 20px 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+}
+
+.menu-item {
+  margin-bottom: 12px;
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-decoration: none;
+  color: white;
+  padding: 14px 16px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.menu-link i {
+  font-size: 20px;
+}
+
+.menu-link:hover {
+  background: rgba(255,193,7,0.15);
+  color: #ffc107;
+}
+
+.active-item .menu-link {
+  background: #ffc107;
+  color: #212529;
+  font-weight: 600;
+}
+
+.profile-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 15px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  background: #ffc107;
+  color: #212529;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.profile-name {
+  margin: 0;
+  color: white;
+}
+
+.profile-role {
+  font-size: 12px;
+  color: #adb5bd;
+}
+
+@media(max-width:768px){
+  .custom-sidebar{
+    width:220px;
+  }
+}
