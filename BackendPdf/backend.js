@@ -4,9 +4,9 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
-ffmpeg.setFfmpegPath(
-  "C:/Users/HOME/Downloads/ffmpeg-2026-06-01-git-bf608f16fd-essentials_build - Copy/bin/ffmpeg.exe"
-);
+//ffmpeg.setFfmpegPath(
+//  "C:/Users/HOME/Downloads/ffmpeg-2026-06-01-git-bf608f16fd-essentials_build - Copy/bin/ffmpeg.exe"
+//);
 const fs = require('fs');
 const axios = require('axios');
 const FormData = require('form-data');
@@ -422,7 +422,7 @@ async function calculateSimilarity(transcription_texts, pdf_texts) {
       return { error: 'Both transcription_text and pdf_text are required.' };
     }
 
-    const response = await axios.post('http://localhost:5001/api/similarity', {
+    const response = await axios.post('https://lecture-check-1.onrender.com/api/similarity', {
       transcription_texts,
       pdf_texts
     });
