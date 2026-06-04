@@ -3,3 +3,5 @@ sentence-transformers
 torch
 transformers
 huggingface-hub
+requests
+gunicorn
