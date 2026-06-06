@@ -66,15 +66,6 @@ function Home() {
             using semantic similarity analysis.
           </p>
 
-          <div className="hero-actions">
-            <Link to="/uploadvd" className="hero-button">
-              <i className="bi bi-cloud-upload-fill"></i>
-              Upload Lecture
-            </Link>
-            <Link to="/similarity-score" className="hero-button-ghost">
-              View Reports
-            </Link>
-          </div>
         </div>
 
         <div className="hero-illustration">
