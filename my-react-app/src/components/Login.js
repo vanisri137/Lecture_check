@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+const BACKEND_URI = process.env.REACT_APP_API_URL;
 function Login({ onLogin }) {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -11,7 +11,7 @@ function Login({ onLogin }) {
     async function submit(e) {
         e.preventDefault();
         try {
-            const response = await axios.post("https://lecture-check-2.onrender.com/login", {
+            const response = await axios.post(`${BACKEND_URI}/login`, {
                 email: email,
                 password: password
             });
