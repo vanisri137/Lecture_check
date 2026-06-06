@@ -59,50 +59,83 @@ const UploadList = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row">
-        <div className="col-md-6">
-          <h2>Upload Video</h2>
-          <div className="mb-3">
-            <label htmlFor="title" className="form-label">Title:</label>
-            <input type="text" id="title" className="form-control" value={title} onChange={(e) => setTitle(e.target.value)} />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="file" className="form-label">Choose a video file:</label>
-            <input type="file" id="file" className="form-control" onChange={handleFileChange} />
-          </div>
-          <div className="d-flex justify-content-between">
-            {/* <button className="btn btn-primary" onClick={handleUpload}>Upload</button> */}
-            <button className="btn btn-primary" onClick={handleUpload} disabled={isUploading}>
-              {isUploading ? 'Uploading...' : 'Upload'}
-            </button>
-            <button className="btn btn-secondary" style={{ backgroundColor: '#ffc107', color: 'black', border: 'none' }} onClick={handleNext}>Next</button>
-          </div>
+    <div className="upload-page">
+  <div className="upload-form-card">
+    <h2 className="section-title">Upload New Lecture</h2>
+
+    <div className="form-group">
+      <label>Lecture Title</label>
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="form-control"
+      />
+    </div>
+
+    <div className="form-group">
+      <label>Select Video</label>
+      <input
+        type="file"
+        className="form-control"
+        onChange={handleFileChange}
+      />
+    </div>
+
+    <button
+      className="upload-submit-btn btn btn-warning"
+      onClick={handleUpload}
+    >
+      Upload Lecture
+    </button>
+
+    <button
+      className="btn btn-secondary mt-2"
+      onClick={handleNext}
+    >
+      Next
+    </button>
+  </div>
+
+  <div className="videos-section">
+    <div className="section-title">
+      Uploaded Lectures
+      <span className="count-chip">
+        ({medias.length})
+      </span>
+    </div>
+
+    {medias.length === 0 ? (
+      <div className="empty-state">
+        <div className="empty-title">
+          No lectures uploaded yet
         </div>
-        <div className="col-md-6">
-          <h2>Uploaded Videos</h2>
-          <div className="video-container" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            <div className="list-group">
-              {medias && medias.length > 0 ? (
-                medias.map((media) => (
-                  <div key={media._id} className="list-group-item">
-                    <h5 className="mb-1">Title: {media.name}</h5>
-                    <div className="video-wrapper">
-                      <video width="100%" height="auto" controls>
-                        <source src={`${BACKEND_URI}${media.videos[0]}`} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p>No uploads available</p>
-              )}
-            </div>
-          </div>
+        <div className="empty-sub">
+          Upload your first lecture video.
         </div>
       </div>
-    </div>
+    ) : (
+      <div className="videos-grid">
+        {medias.map((media) => (
+          <div key={media._id} className="video-card">
+            <video width="100%" controls>
+              <source
+                src={`${BACKEND_URI}${media.videos[0]}`}
+                type="video/mp4"
+              />
+            </video>
+
+            <div className="video-info">
+              <div className="video-title">
+                {media.name}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
   );
 };
 
