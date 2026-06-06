@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const BACKEND_URI = 'http://localhost:5000';
+const BACKEND_URI = 'https://lecture-check-2.onrender.com';
 
 const UploadList = () => {
   const [title, setTitle] = useState('');
