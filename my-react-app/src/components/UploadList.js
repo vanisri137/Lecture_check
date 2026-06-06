@@ -212,6 +212,8 @@ const UploadList = () => {
                       <i className="bi bi-play-circle"></i> Lecture
                     </span>
                   </div>
+</div>
+</div>
             ))}
           </div>
         )}
