@@ -214,6 +214,8 @@ const UploadList = () => {
                     </span>
                   </div>
 </div>
+</div>
+
             ))}
           </div>
         )}
