@@ -94,7 +94,7 @@ function Home() {
             <i className="bi bi-play-circle-fill"></i>
           </div>
           <div className="stat-body">
-            <span className="stat-value">--</span>
+            <span className="stat-value">{stats?.lectures || 0}</span>
             <h3 className="stat-label">Uploaded Lectures</h3>
           </div>
           <div className="stat-glow stat-glow--amber"></div>
@@ -105,7 +105,7 @@ function Home() {
             <i className="bi bi-file-earmark-pdf-fill"></i>
           </div>
           <div className="stat-body">
-            <span className="stat-value">--</span>
+            <span className="stat-value">{stats?.pdfs || 0}</span>
             <h3 className="stat-label">PDFs Uploaded</h3>
           </div>
           <div className="stat-glow stat-glow--red"></div>
@@ -116,7 +116,7 @@ function Home() {
             <i className="bi bi-graph-up-arrow"></i>
           </div>
           <div className="stat-body">
-            <span className="stat-value">--</span>
+            <span className="stat-value">{stats?.latestSimilarity? `${stats.latestSimilarity}%`: 'N/A'}</span>
             <h3 className="stat-label">Latest Similarity</h3>
           </div>
           <div className="stat-glow stat-glow--green"></div>
