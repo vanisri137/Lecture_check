@@ -29,8 +29,18 @@ const SimilarityScore = () => {
 
         const response = await axios.get(`${BACKEND_URI}/api/v1/similarity-score`
         );
+const rawScore = response.data.similarity_score;
 
-        const score = response.data.similarity_score * 100;
+// Guard against NaN, null, undefined, non-number
+if (rawScore === null || rawScore === undefined || isNaN(Number(rawScore))) {
+  setError('Could not calculate similarity score. Please try again.');
+  setLoading(false);
+  return;
+}
+
+// Backend returns 0.0–1.0 fraction; convert to percentage and clamp
+const score = Math.min(Math.max(Number(rawScore) * 100, 0), 100);
+        
 
         setActualScore(score);
         setLoading(false);
