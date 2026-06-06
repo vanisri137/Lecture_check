@@ -34,11 +34,6 @@
   --radius-lg:    18px;
 }
 
-/* ════════════════════════════════════════════════════════════
-   SECTION 1 — UploadList.js
-   Classes: .upload-page, .upload-form-card, .videos-section,
-            .videos-grid, .video-card, .empty-state …
-════════════════════════════════════════════════════════════ */
 
 /* ── Page shell ── */
 .upload-page {
@@ -404,12 +399,33 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.video-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
 
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
 .video-meta-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 
 .video-tag {
   display: inline-flex;
@@ -462,12 +478,6 @@
   line-height: 1.6;
 }
 
-
-/* ════════════════════════════════════════════════════════════
-   SECTION 2 — Upload.js (Reference PDF page)
-   Classes: .pdf-page, .pdf-upload-card, .pdf-library-card,
-            .pdf-dropzone, .pdf-list, .pdf-list-item …
-════════════════════════════════════════════════════════════ */
 
 /* ── Page shell ── */
 .pdf-page {
