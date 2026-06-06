@@ -2,7 +2,8 @@ import axios from 'axios';
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import './upload.css';
- 
+const BACKEND_URI = process.env.REACT_APP_API_URL;
+
 function Upload() {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState("");
@@ -19,7 +20,7 @@ function Upload() {
  
   const getPdf = async () => {
     try {
-      const result = await axios.get("http://localhost:5000/get-files");
+      const result = await axios.get(`${BACKEND_URI}/get-files`);
       setAllPdf(result.data.data);
     } catch (error) {
       console.error('Error fetching PDFs:', error);
@@ -33,8 +34,7 @@ function Upload() {
     formData.append("title", title);
     formData.append("file", file);
     try {
-      const result = await axios.post(
-        "http://localhost:5000/upload-files",
+      const result = await axios.post(`${BACKEND_URI}/upload-files`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -55,7 +55,7 @@ function Upload() {
  
   const deletePdf = async (pdfId) => {
     try {
-      const result = await axios.delete(`http://localhost:5000/delete-file/${pdfId}`);
+      const result = await axios.delete(`${BACKEND_URI}/delete-file/${pdfId}`);
       if (result.data.status === "ok") {
         alert("Deleted Successfully!!!!!");
         setAllPdf(allPdf.filter((pdf) => pdf._id !== pdfId));
@@ -69,7 +69,7 @@ function Upload() {
   };
  
   const showPdf = (pdf) => {
-    window.open(`http://localhost:5000/files/${pdf}`, "_blank", "noreferrer");
+    window.open(`${BACKEND_URI}/files/${pdf}`, "_blank", "noreferrer");
   };
  
   const handleBack = () => {
