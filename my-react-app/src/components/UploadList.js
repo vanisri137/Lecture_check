@@ -59,6 +59,19 @@ const UploadList = () => {
   const handleNext = () => {
     navigate('/upload');
   };
+  const handleDelete = async (id) => {
+  try {
+    await axios.delete(
+      `${BACKEND_URI}/api/v1/media/${id}`
+    );
+
+    fetchMedias();
+    alert("Video deleted successfully");
+  } catch (error) {
+    console.error(error);
+    alert("Failed to delete video");
+  }
+};
 
   return (
     <div className="upload-page">
