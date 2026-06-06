@@ -519,7 +519,38 @@ app.delete('/delete-file/:id', async (req, res) => {
     res.status(500).json({ status: "error", message: "Failed to delete PDF" });
   }
 });
+app.delete('/api/v1/media/:id', async (req, res) => {
+  try {
+    const media = await Media.findById(req.params.id);
 
+    if (!media) {
+      return res.status(404).json({
+        message: 'Video not found'
+      });
+    }
+
+    for (const videoPath of media.videos) {
+      const fullPath = path.join(__dirname, videoPath);
+
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    }
+
+    await Media.findByIdAndDelete(req.params.id);
+
+    res.json({
+      message: 'Video deleted successfully'
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Delete failed'
+    });
+  }
+});
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
