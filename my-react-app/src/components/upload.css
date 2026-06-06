@@ -1046,19 +1046,4 @@
     grid-template-columns: 1fr;
   }
 }
-.video-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.delete-btn {
-  background: transparent;
-  border: none;
-  color: #ef4444;
-  cursor: pointer;
-  font-size: 16px;
-}
 
-.delete-btn:hover {
-  transform: scale(1.1);
-}
