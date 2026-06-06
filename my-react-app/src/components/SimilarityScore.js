@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+const BACKEND_URI = process.env.REACT_APP_API_URL;
 
 const SimilarityScore = () => {
   const [similarityScore, setSimilarityScore] = useState(0);
@@ -26,8 +27,7 @@ const SimilarityScore = () => {
       try {
         setLoading(true);
 
-        const response = await axios.get(
-          'http://localhost:5000/api/v1/similarity-score'
+        const response = await axios.get(`${BACKEND_URI}/api/v1/similarity-score`
         );
 
         const score = response.data.similarity_score * 100;
