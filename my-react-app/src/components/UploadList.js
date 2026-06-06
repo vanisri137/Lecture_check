@@ -200,13 +200,7 @@ const UploadList = () => {
 
                 <div className="video-header">
                   <div className="video-title">{media.name}</div>
-                        <button
-                        className="delete-btn"
-                          onClick={() => handleDelete(media._id)}
-                            > 
-                            <i classname= "bi bi-trash"></i>
-                            </button>
-                            
+                       
                   <div className="video-meta-row">
                     <span className="video-tag">
                       <i className="bi bi-play-circle"></i> Lecture
