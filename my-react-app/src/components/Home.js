@@ -14,13 +14,7 @@ import "./Home.css";
 
 const BACKEND_URI = process.env.REACT_APP_API_URL;
 
-const data = [
-  { week: "W1", score: 45 },
-  { week: "W2", score: 58 },
-  { week: "W3", score: 67 },
-  { week: "W4", score: 72 },
-  { week: "W5", score: 81 },
-];
+
 
 function Home() {
   const [stats, setStats] = useState({
@@ -113,54 +107,6 @@ function Home() {
           <div className="stat-glow stat-glow--green"></div>
         </div>
 
-      </section>
-
-      {/* ── Chart ── */}
-      <section className="chart-card">
-        <div className="chart-card-header">
-          <h2 className="chart-card-title">
-            <span className="section-dot"></span>
-            Similarity Trend
-          </h2>
-          <span className="chart-card-sub">Last 5 weeks</span>
-        </div>
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={data}>
-            <XAxis
-              dataKey="week"
-              stroke="#484d5e"
-              tick={{ fill: "#7e8494", fontSize: 12, fontFamily: "DM Sans" }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              stroke="#484d5e"
-              tick={{ fill: "#7e8494", fontSize: 12, fontFamily: "DM Sans" }}
-              axisLine={false}
-              tickLine={false}
-              domain={[0, 100]}
-            />
-            <Tooltip
-              contentStyle={{
-                background: "#151821",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: "8px",
-                color: "#f0ede8",
-                fontSize: "13px",
-                fontFamily: "DM Sans",
-              }}
-              cursor={{ stroke: "rgba(245,158,11,0.2)", strokeWidth: 1 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="score"
-              stroke="#f59e0b"
-              strokeWidth={2.5}
-              dot={{ fill: "#f59e0b", r: 4, strokeWidth: 0 }}
-              activeDot={{ fill: "#fbbf24", r: 6, strokeWidth: 0 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
       </section>
 
       {/* ── Activity ── */}
