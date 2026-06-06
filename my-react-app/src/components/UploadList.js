@@ -79,7 +79,7 @@ const UploadList = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="upload-field-input"
-            placeholder="e.g. Week 8 — Neural Networks"
+            placeholder="e.g. Week 1 — Neural Networks"
           />
         </div>
 
@@ -164,7 +164,7 @@ const UploadList = () => {
               <i className="bi bi-collection-play"></i>
             </div>
             <div className="empty-title">No lectures uploaded yet</div>
-            <div className="empty-sub">Upload your first lecture video using the form.</div>
+            <div className="empty-sub">Upload your first lecture video using the form</div>
           </div>
         ) : (
           <div className="videos-grid">
@@ -187,6 +187,13 @@ const UploadList = () => {
 
                 <div className="video-info">
                   <div className="video-title">{media.name}</div>
+                        <button
+                        className="delete-btn"
+                          onClick={() => 
+                            handleDelete(media._id)}
+                            > 🗑 Delete
+                            </button>
+                            </div>
                   <div className="video-meta-row">
                     <span className="video-tag">
                       <i className="bi bi-play-circle"></i> Lecture
