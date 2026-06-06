@@ -1046,3 +1046,8 @@
     grid-template-columns: 1fr;
   }
 }
+.video-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
