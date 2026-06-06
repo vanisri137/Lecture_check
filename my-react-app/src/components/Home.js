@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import "./Home.css";
-
+const BACKEND_URI = process.env.REACT_APP_API_URL;
 const data = [
   { week: "W1", score: 45 },
   { week: "W2", score: 58 },
@@ -36,8 +36,8 @@ useEffect(() => {
 const fetchStats = async () => {
   try {
     const res = await axios.get(
-      "http://localhost:5000/dashboard-stats"
-    );
+  `${BACKEND_URI}/dashboard-stats`
+);  
 
     setStats(res.data);
 
