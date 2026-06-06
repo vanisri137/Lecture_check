@@ -197,7 +197,7 @@ const UploadList = () => {
                     />
                   </video>
                 </div>
-
+              <div className='video-info'>   
                 <div className="video-header">
                   <div className="video-title">{media.name}</div>
                         <button className="delete-btn"
