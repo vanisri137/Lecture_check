@@ -155,11 +155,11 @@ python similarityCheck.py
 
 ---
 ### login page 
-(Screenshot%20 2026-06-02%20163503.png)
+![](Screenshot%20 2026-06-02%20163503.png)
 ### Dashboard
-(Screenshot%20 2026-06-02%20093706.png)
+![](Screenshot%20 2026-06-02%20093706.png)
 ### Similarity Analysis
-(Screenshot%20 2026-06-02%20155733.png)
+![](Screenshot%20 2026-06-02%20155733.png)
 
 
 ## 🎯 Key Highlights
