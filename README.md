@@ -154,7 +154,7 @@ python similarityCheck.py
 7. Results are displayed through the dashboard.
 
 ---
-
+Screenshot 2026-06-02 163503.png
 
 
 ## 🎯 Key Highlights
