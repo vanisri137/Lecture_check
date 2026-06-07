@@ -4,7 +4,7 @@
 node_modules/
 BackendPdf/node_modules/
 my-react-app/node_modules/
-
+.env
 /node_modules
 /.pnp
 .pnp.js
