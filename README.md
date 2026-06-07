@@ -154,12 +154,13 @@ python similarityCheck.py
 7. Results are displayed through the dashboard.
 
 ---
-### login page 
-![](Screenshot%20 2026-06-02%20163503.png)
-### Dashboard
-![](Screenshot%20 2026-06-02%20093706.png)
-### Similarity Analysis
-![](Screenshot%20 2026-06-02%20155733.png)
+## 📸 Screenshots
+
+![](Screenshot%202026-06-02%20155733.png)
+
+![](Screenshot%202026-06-02%20163503.png)
+
+![](Screenshot%202026-06-06%20093706.png)
 
 
 ## 🎯 Key Highlights
