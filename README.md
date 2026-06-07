@@ -155,6 +155,8 @@ python similarityCheck.py
 
 ---
 
+
+
 ## 🎯 Key Highlights
 
 - Full-stack MERN-based application
